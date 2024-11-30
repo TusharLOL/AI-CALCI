@@ -124,7 +124,7 @@ export default function Home() {
             }
         }
     };
-    const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
         if (!isDrawing) {
             return;
         }
@@ -133,11 +133,24 @@ export default function Home() {
             const ctx = canvas.getContext('2d');
             if (ctx) {
                 ctx.strokeStyle = color;
-                ctx.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+                let x, y;
+                if (e.type === 'mousemove') {
+                    x = (e as React.MouseEvent<HTMLCanvasElement>).nativeEvent.offsetX;
+                    y = (e as React.MouseEvent<HTMLCanvasElement>).nativeEvent.offsetY;
+                } else {
+                    const touch = (e as React.TouchEvent<HTMLCanvasElement>).touches[0];
+                    const rect = canvas.getBoundingClientRect();
+                    x = touch.clientX - rect.left;
+                    y = touch.clientY - rect.top;
+                }
+                ctx.lineTo(x, y);
                 ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x, y);
             }
         }
     };
+    
     const stopDrawing = () => {
         setIsDrawing(false);
     };  
